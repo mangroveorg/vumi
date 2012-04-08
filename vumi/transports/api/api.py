@@ -45,7 +45,7 @@ class HttpApiTransport(HttpRpcTransport):
     def setup_transport(self):
         self.reply_expected = self.config.get('reply_expected', False)
         self.allowed_fields = self.config.get('allowed_fields',
-                                              self.DEFAULT_ALLOWED_FIELDS)
+            self.DEFAULT_ALLOWED_FIELDS)
         self.field_defaults = self.config.get('field_defaults', {})
         return super(HttpApiTransport, self).setup_transport()
 
@@ -72,8 +72,14 @@ class HttpApiTransport(HttpRpcTransport):
 
     @inlineCallbacks
     def handle_raw_inbound_message(self, message_id, request):
-        values, errors = self.get_field_values(
-            request, 'content', 'to_addr', 'from_addr')
+        if self.allowed_fields.count('transport_name') is 0:
+            values, errors = self.get_field_values(request, 'content', 'to_addr', 'from_addr')
+        else:
+            values, errors = self.get_field_values(
+                request, 'content', 'to_addr', 'from_addr' ,'transport_name')
+            transport_name = values.get('transport_name', None)
+            if transport_name is not None:
+                self.transport_name=transport_name
         if errors:
             yield self.finish_request(message_id, json.dumps(errors), code=400)
             return
@@ -89,4 +95,4 @@ class HttpApiTransport(HttpRpcTransport):
         )
         if not self.reply_expected:
             yield self.finish_request(message_id,
-                                      json.dumps({'message_id': message_id}))
+                json.dumps({'message_id': message_id}))

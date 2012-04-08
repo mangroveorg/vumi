@@ -145,3 +145,11 @@ class TestHttpApiTransport(TransportTestCase):
         self.assertEqual(400, response.code)
         self.assertEqual(json.loads(response.delivered_body),
                          {'unexpected_parameter': ['to_addr']})
+
+    @inlineCallbacks
+    @config_override(allowed_fields=['content', 'from_addr', 'to_addr', 'transport_name'])
+    def test_transport_name_in_input(self):
+        url = self.mkurl('hello' ,transport_name='smpp_transport')
+        response = yield http_request_full(url, '', method='GET')
+        self.assertEqual(200, response.code)
+        self.assertEqual(self.transport.transport_name, 'smpp_transport')
