@@ -7,8 +7,6 @@ from vumi.webapp.api.models import URLCallback
 from vumi.webapp.api.forms import URLCallbackForm
 from vumi.webapp.api.utils import specify_fields
 
-from alexandria.loader.base import YAMLLoader
-from alexandria.dsl.utils import dump_menu
 
 # Complete reset, clear defaults - they're hard to debug
 Mimer.TYPES = {}

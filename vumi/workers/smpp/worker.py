@@ -198,8 +198,8 @@ class SMSReceiptWorker(Worker):
 #==================================================================================================
 
 class SMSBatchConsumer(Consumer):
-    exchange_name = "vumi"
-    exchange_type = "direct"
+    exchange_name = "vumi.topic"
+    exchange_type = "topic"
     durable = True
     delivery_mode = 2
     queue_name = "sms.internal.debatcher"
@@ -234,8 +234,8 @@ class IndivPublisher(Publisher):
     This publisher publishes all incoming SMPP messages to the
     `vumi.smpp` exchange, its default routing key is `smpp.fallback`
     """
-    exchange_name = "vumi"
-    exchange_type = "direct"
+    exchange_name = "vumi.topic"
+    exchange_type = "topic"
     routing_key = "sms.outbound.fallback"
     durable = True
     auto_delete = False

@@ -4,7 +4,7 @@ from twisted.python import log
 from django.contrib.auth.models import User
 from vumi.service import Worker
 from vumi.message import Message
-from vumi.webapp.api import utils
+from vumi.webapp.api import utils, models
 from vumi.webapp.api.models import SentSMS, SentSMSBatch
 
 class TopicSmppWorker(Worker):
@@ -27,6 +27,16 @@ class TopicSmppWorker(Worker):
         )
     
     def consume_message(self, message):
+        #--------------- Patch for 0.1.1 -> 0.1.2 --------------------------
+        smpplink_count = models.SMPPLink.objects \
+                .filter(sent_sms=message.payload.get("id")) \
+                .count()
+        if smpplink_count > 0:
+            log.msg("SMS with sent_sms_id:%s has already been sent!" % (message.payload.get("id")))
+            return True
+        #--------------- Patch for 0.1.1 -> 0.1.2 --------------------------
+
+
         dictionary = message.payload
         to_msisdn = dictionary.get('destination_addr')
         from_msisdn = dictionary.get('source_addr')
@@ -37,7 +47,7 @@ class TopicSmppWorker(Worker):
                 ("callback_name", "sms_received"),
                 ("to_msisdn", str(to_msisdn)),
                 ("from_msisdn", str(from_msisdn)),
-                ("message", str(message))
+                ("message", message)
             ]
             url, resp = utils.callback(self.config.get('POST_TO_URL'), params)
             log.msg('RESP: %s' % repr(resp))

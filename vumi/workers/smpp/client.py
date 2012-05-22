@@ -178,12 +178,27 @@ class EsmeTransceiver(Protocol):
                         delivery_report = delivery_report.groupdict()
                         )
             else:
+                short_message = pdu['body']['mandatory_parameters']['short_message']
+                data_coding = pdu['body']['mandatory_parameters']['data_coding']
+                decoded_message = self._decode_message(short_message, data_coding)
                 self.__deliver_sm_callback(
                         destination_addr = pdu['body']['mandatory_parameters']['destination_addr'],
                         source_addr = pdu['body']['mandatory_parameters']['source_addr'],
-                        short_message = pdu['body']['mandatory_parameters']['short_message']
+                        short_message = decoded_message
                         )
 
+
+    def _decode_message(self, message, data_coding):
+        codec = {
+            1: 'ascii',
+            3: 'latin1',
+            8: 'utf-16be',  # Actually UCS-2, but close enough.
+        }.get(data_coding, None)
+        if codec is None or message is None:
+            log.msg("WARNING: Not decoding message with data_coding=%s" % (
+                data_coding,))
+            return message
+        return message.decode(codec)
 
     def handle_enquire_link_resp(self, pdu):
         if pdu['header']['command_status'] == 'ESME_ROK':
@@ -358,5 +373,6 @@ class EsmeTransceiverFactory(ReconnectingClientFactory):
     def clientConnectionFailed(self, connector, reason):
         print 'Connection failed. Reason:', reason
         ReconnectingClientFactory.clientConnectionFailed(self, connector, reason)
+
 
 

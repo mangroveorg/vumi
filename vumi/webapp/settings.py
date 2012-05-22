@@ -21,6 +21,7 @@ DATABASES = {
         'PASSWORD': 'vumi',                 # Not used with sqlite3.
         'HOST':     'localhost',            # Set to empty string for localhost. Not used with sqlite3.
         'PORT':     '',                     # Set to empty string for default. Not used with sqlite3.
+        'OPTIONS': {'autocommit': True,} 
     }
 }
 
@@ -109,12 +110,12 @@ BROKER_VHOST = "/develop"
 
 CELERY_QUEUES = {
     "default": {
-        "exchange": "vumi",
+        "exchange": "vumi.topic",
         "binding_key": "vumi.webapp",
     }
 }
 CELERY_DEFAULT_QUEUE = "default"
-CELERY_DEFAULT_EXCHANGE_TYPE = "direct"
+CELERY_DEFAULT_EXCHANGE_TYPE = "topic"
 CELERY_DEFAULT_ROUTING_KEY = "vumi.webapp"
 
 # set the environment VUMI_SKIP_QUEUE to have the Celery tasks evaluated
